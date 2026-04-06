@@ -1,0 +1,94 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Settings {
+  id             Int      @id @default(1)
+  fullName       String   @default("")
+  email          String   @default("")
+  location       String   @default("")
+  timezone       String   @default("")
+  targetRoles    String   @default("[]")
+  salaryMin      Int      @default(0)
+  salaryMax      Int      @default(0)
+  h1bFilter      Boolean  @default(false)
+  llmProvider    String   @default("claude")
+  llmModel       String   @default("claude-sonnet-4-6")
+  llmApiKey      String   @default("")
+  llmBaseUrl     String   @default("")
+  onboardingDone Boolean  @default(false)
+  updatedAt      DateTime @updatedAt
+}
+
+model CV {
+  id        Int      @id @default(autoincrement())
+  content   String
+  version   Int      @default(1)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+model Application {
+  id          Int      @id @default(autoincrement())
+  num         Int      @unique
+  date        DateTime @default(now())
+  company     String
+  role        String
+  score       Float?
+  status      String   @default("Evaluated")
+  hasPdf      Boolean  @default(false)
+  notes       String   @default("")
+  url         String   @default("")
+  h1bFriendly Boolean?
+  reportId    Int?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  report      Report?  @relation(fields: [reportId], references: [id])
+}
+
+model Report {
+  id           Int           @id @default(autoincrement())
+  num          Int           @unique
+  slug         String
+  content      String
+  pdfPath      String        @default("")
+  createdAt    DateTime      @default(now())
+  applications Application[]
+}
+
+model PipelineItem {
+  id          Int       @id @default(autoincrement())
+  url         String
+  notes       String    @default("")
+  status      String    @default("pending")
+  addedAt     DateTime  @default(now())
+  processedAt DateTime?
+}
+
+model Portal {
+  id          Int     @id @default(autoincrement())
+  name        String
+  company     String
+  url         String
+  enabled     Boolean @default(true)
+  h1bFriendly Boolean @default(false)
+  keywords    String  @default("[]")
+}
+
+model StoryBank {
+  id         Int      @id @default(autoincrement())
+  company    String
+  role       String
+  situation  String
+  task       String
+  action     String
+  result     String
+  reflection String   @default("")
+  tags       String   @default("[]")
+  createdAt  DateTime @default(now())
+}
