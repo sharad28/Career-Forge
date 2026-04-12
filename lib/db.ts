@@ -1,6 +1,5 @@
 import { PrismaClient } from "@prisma/client";
 import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
-import path from "path";
 
 const rawUrl = process.env.DATABASE_URL || "file:./prisma/dev.db";
 const dbUrl = rawUrl.startsWith("file:") ? rawUrl : `file:${rawUrl}`;

@@ -1,22 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { callLLM, LLMConfig } from "@/lib/ai";
-
-const LINKEDIN_SYSTEM = `You are a LinkedIn optimization expert. Audit a LinkedIn profile and provide specific rewrites.
-
-Return ONLY valid JSON in this exact shape:
-{
-  "headline": { "issue": "...", "rewrite": "..." },
-  "about": { "issue": "...", "rewrite": "..." },
-  "bullets": [{ "original": "...", "issue": "...", "rewrite": "..." }],
-  "featured": "what to pin in featured section",
-  "skills": ["missing skill 1", "missing skill 2"],
-  "cta": "suggested call to action",
-  "postIdeas": ["post idea 1", "post idea 2", "post idea 3"]
-}
-
-For bullets: flag max 3 weak bullets and rewrite them with [Action] + [What] + [Quantified Result].
-For skills: list keywords missing for SEO and recruiter discoverability.`;
+import { callLLM } from "@/lib/ai";
+import { getLLMConfig } from "@/lib/settings";
+import { LINKEDIN_SYSTEM } from "@/lib/prompts/linkedin";
 
 export async function POST(req: NextRequest) {
   try {
@@ -25,19 +11,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "No profile content provided" }, { status: 400 });
     }
 
-    const settings = await prisma.settings.findFirst();
-    if (!settings?.llmApiKey && settings?.llmProvider !== "ollama") {
-      return NextResponse.json({ error: "No API key configured" }, { status: 400 });
-    }
-
+    const { config, settings } = await getLLMConfig();
     const cv = await prisma.cV.findFirst({ where: { isActive: true } });
-
-    const config: LLMConfig = {
-      provider: (settings?.llmProvider as LLMConfig["provider"]) || "claude",
-      model: settings?.llmModel || "claude-sonnet-4-6",
-      apiKey: settings?.llmApiKey || "",
-      baseUrl: settings?.llmBaseUrl || undefined,
-    };
 
     const prompt = `
 ## User Goal

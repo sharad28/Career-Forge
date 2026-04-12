@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { fetchAllPortals, matchesQuery } from "@/lib/jobs";
 
-// Stub: in production this would use Playwright to scrape job portals
-// For now returns a placeholder response pointing to real job search URLs
+export const maxDuration = 60;
+
 export async function POST(req: NextRequest) {
   try {
     const { query } = await req.json();
@@ -10,43 +11,79 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "No query provided" }, { status: 400 });
     }
 
-    const settings = await prisma.settings.findFirst();
-    const encoded = encodeURIComponent(query);
+    const [settings, portals, existingApps] = await Promise.all([
+      prisma.settings.findFirst(),
+      prisma.portal.findMany({ where: { enabled: true } }),
+      prisma.application.findMany({ select: { url: true }, where: { url: { not: "" } } }),
+    ]);
 
-    // Return search links to configured portals
-    // Full Playwright scraping is wired in the Playwright integration layer
-    const results = [
-      {
-        title: `Search: "${query}" on LinkedIn`,
-        company: "LinkedIn Jobs",
-        url: `https://www.linkedin.com/jobs/search/?keywords=${encoded}&f_TPR=r86400`,
-        location: "Various",
-        postedAt: "Last 24h",
-        h1bFriendly: null,
-        snippet: "Click to search LinkedIn Jobs. Filter by 'Past 24 hours' for early applications.",
-      },
-      {
-        title: `Search: "${query}" on Indeed`,
-        company: "Indeed",
-        url: `https://www.indeed.com/jobs?q=${encoded}&fromage=1`,
-        location: "Various",
-        postedAt: "Last 24h",
-        h1bFriendly: null,
-        snippet: "Indeed search filtered to last 24 hours.",
-      },
-      {
-        title: `Search: "${query}" on Greenhouse`,
-        company: "Greenhouse Job Board",
-        url: `https://boards.greenhouse.io/search?q=${encoded}`,
-        location: "Various",
-        postedAt: null,
-        h1bFriendly: null,
-        snippet: "Direct company job boards via Greenhouse ATS.",
-      },
-    ];
+    const trackedUrls = new Set(existingApps.map((a) => a.url));
 
-    return NextResponse.json({ results });
+    // Only fetch from Greenhouse / Lever / Ashby portals — skip unknowns
+    const activePortals = portals.filter((p) => {
+      if (settings?.h1bFilter && !p.h1bFriendly) return false;
+      return /boards\.greenhouse\.io|job-boards\.greenhouse\.io|jobs\.lever\.co|jobs\.ashbyhq\.com/i.test(p.url);
+    });
+
+    const liveJobs = activePortals.length > 0
+      ? await fetchAllPortals(
+          activePortals.map((p) => ({
+            url: p.url,
+            company: p.company || p.name,
+            h1bFriendly: p.h1bFriendly,
+          }))
+        )
+      : [];
+
+    // Filter by query keywords
+    const matched = liveJobs.filter((j) => matchesQuery(j, query));
+
+    // Annotate with h1bFriendly + alreadyTracked
+    const results = matched.map((job) => {
+      const portal = activePortals.find((p) => {
+        try {
+          return job.url.includes(new URL(p.url).hostname.replace("www.", ""));
+        } catch { return false; }
+      });
+      return {
+        title: job.title,
+        company: job.company,
+        url: job.url,
+        location: job.location,
+        postedAt: job.postedAt,
+        postedAtRaw: job.postedAtRaw,
+        h1bFriendly: portal?.h1bFriendly ?? null,
+        snippet: job.snippet,
+        source: job.source,
+        alreadyTracked: trackedUrls.has(job.url),
+      };
+    });
+
+    // Sort by publish date — newest first, nulls last
+    results.sort((a, b) => {
+      if (!a.postedAtRaw && !b.postedAtRaw) return 0;
+      if (!a.postedAtRaw) return 1;
+      if (!b.postedAtRaw) return -1;
+      return new Date(b.postedAtRaw).getTime() - new Date(a.postedAtRaw).getTime();
+    });
+
+    const breakdown = {
+      greenhouse: liveJobs.filter((j) => j.source === "greenhouse").length,
+      lever:      liveJobs.filter((j) => j.source === "lever").length,
+      ashby:      liveJobs.filter((j) => j.source === "ashby").length,
+    };
+
+    return NextResponse.json({
+      results,
+      meta: {
+        portalsScanned: activePortals.length,
+        totalFound: matched.length,
+        query,
+        breakdown,
+      },
+    });
   } catch (e: unknown) {
+    console.error(e);
     return NextResponse.json({ error: "Scan failed" }, { status: 500 });
   }
 }

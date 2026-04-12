@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { callLLM, LLMConfig } from "@/lib/ai";
+import { callLLM } from "@/lib/ai";
+import { getLLMConfig } from "@/lib/settings";
+import { ATS_AUDIT_SYSTEM } from "@/lib/prompts/cv";
 
 export async function GET() {
   const cv = await prisma.cV.findFirst({ where: { isActive: true } });
@@ -11,12 +13,12 @@ export async function POST(req: NextRequest) {
   try {
     const { content } = await req.json();
 
-    // Deactivate old versions
-    await prisma.cV.updateMany({ where: { isActive: true }, data: { isActive: false } });
-
     const last = await prisma.cV.findFirst({ orderBy: { version: "desc" } });
-    const cv = await prisma.cV.create({
-      data: { content, version: (last?.version ?? 0) + 1, isActive: true },
+    const cv = await prisma.$transaction(async (tx) => {
+      await tx.cV.updateMany({ where: { isActive: true }, data: { isActive: false } });
+      return tx.cV.create({
+        data: { content, version: (last?.version ?? 0) + 1, isActive: true },
+      });
     });
 
     return NextResponse.json(cv);
@@ -29,29 +31,12 @@ export async function POST(req: NextRequest) {
 export async function PUT(req: NextRequest) {
   try {
     const { content } = await req.json();
-    const settings = await prisma.settings.findFirst();
-
-    if (!settings?.llmApiKey && settings?.llmProvider !== "ollama") {
-      return NextResponse.json({ error: "No API key configured" }, { status: 400 });
-    }
-
-    const config: LLMConfig = {
-      provider: (settings?.llmProvider as LLMConfig["provider"]) || "claude",
-      model: settings?.llmModel || "claude-sonnet-4-6",
-      apiKey: settings?.llmApiKey || "",
-      baseUrl: settings?.llmBaseUrl || undefined,
-    };
+    const { config } = await getLLMConfig();
 
     const raw = await callLLM(config, [
       {
         role: "system",
-        content: `You are an ATS expert. Audit a CV for ATS compatibility and quality. Return JSON only:
-{
-  "atsScore": <0-100>,
-  "issues": [{"type": "error"|"warning", "message": "..."}],
-  "bulletsWithoutMetrics": ["bullet text..."],
-  "suggestions": ["suggestion..."]
-}`,
+        content: ATS_AUDIT_SYSTEM,
       },
       {
         role: "user",
@@ -64,6 +49,8 @@ export async function PUT(req: NextRequest) {
 
     return NextResponse.json(JSON.parse(jsonMatch[0]));
   } catch (e: unknown) {
-    return NextResponse.json({ error: "Audit failed" }, { status: 500 });
+    const message = e instanceof Error ? e.message : "Audit failed";
+    console.error("ATS Audit error:", message);
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

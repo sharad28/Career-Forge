@@ -28,3 +28,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Failed to add to queue" }, { status: 500 });
   }
 }
+
+export async function PATCH(req: NextRequest) {
+  try {
+    const { id, status } = await req.json();
+    const item = await prisma.pipelineItem.update({
+      where: { id },
+      data: { status, processedAt: new Date() },
+    });
+    return NextResponse.json(item);
+  } catch (e: unknown) {
+    return NextResponse.json({ error: "Update failed" }, { status: 500 });
+  }
+}

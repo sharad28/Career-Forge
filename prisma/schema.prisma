@@ -1,6 +1,5 @@
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["driverAdapters"]
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -8,21 +7,27 @@ datasource db {
 }
 
 model Settings {
-  id             Int      @id @default(1)
-  fullName       String   @default("")
-  email          String   @default("")
-  location       String   @default("")
-  timezone       String   @default("")
-  targetRoles    String   @default("[]")
-  salaryMin      Int      @default(0)
-  salaryMax      Int      @default(0)
-  h1bFilter      Boolean  @default(false)
-  llmProvider    String   @default("claude")
-  llmModel       String   @default("claude-sonnet-4-6")
-  llmApiKey      String   @default("")
-  llmBaseUrl     String   @default("")
-  onboardingDone Boolean  @default(false)
-  updatedAt      DateTime @updatedAt
+  id                 Int      @id @default(1)
+  fullName           String   @default("")
+  email              String   @default("")
+  phone              String   @default("")
+  location           String   @default("")
+  timezone           String   @default("")
+  targetRoles        String   @default("[]")
+  salaryMin          Int      @default(0)
+  salaryMax          Int      @default(0)
+  h1bFilter          Boolean  @default(false)
+  llmProvider        String   @default("claude")
+  llmModel           String   @default("claude-sonnet-4-6")
+  llmApiKey          String   @default("")
+  llmBaseUrl         String   @default("")
+  onboardingDone     Boolean  @default(false)
+  autoApplyMethod    String   @default("auto")
+  computerUseEnabled Boolean  @default(false)
+  linkedinUrl        String   @default("")
+  portfolioUrl       String   @default("")
+  searchApiKey       String   @default("")
+  updatedAt          DateTime @updatedAt
 }
 
 model CV {
@@ -34,21 +39,39 @@ model CV {
 }
 
 model Application {
-  id          Int      @id @default(autoincrement())
-  num         Int      @unique
-  date        DateTime @default(now())
+  id          Int                 @id @default(autoincrement())
+  num         Int                 @unique
+  date        DateTime            @default(now())
   company     String
   role        String
   score       Float?
-  status      String   @default("Evaluated")
-  hasPdf      Boolean  @default(false)
-  notes       String   @default("")
-  url         String   @default("")
+  status      String              @default("Evaluated")
+  hasPdf      Boolean             @default(false)
+  notes       String              @default("")
+  url         String              @default("")
   h1bFriendly Boolean?
   reportId    Int?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  report      Report?  @relation(fields: [reportId], references: [id])
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  report      Report?             @relation(fields: [reportId], references: [id])
+  package     ApplicationPackage?
+}
+
+model ApplicationPackage {
+  id            Int       @id @default(autoincrement())
+  applicationId Int       @unique
+  method        String    @default("manual")
+  atsType       String    @default("")
+  atsJobId      String    @default("")
+  atsBoardToken String    @default("")
+  coverLetter   String    @default("")
+  screeningQA   String    @default("[]")
+  resumePath    String    @default("")
+  status        String    @default("draft")
+  submittedAt   DateTime?
+  errorMessage  String    @default("")
+  generatedAt   DateTime  @default(now())
+  application   Application @relation(fields: [applicationId], references: [id])
 }
 
 model Report {
@@ -72,7 +95,7 @@ model PipelineItem {
 
 model Portal {
   id          Int     @id @default(autoincrement())
-  name        String
+  name        String  @unique
   company     String
   url         String
   enabled     Boolean @default(true)

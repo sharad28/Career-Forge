@@ -3,8 +3,8 @@ import "./globals.css";
 import Sidebar from "@/components/Sidebar";
 
 export const metadata: Metadata = {
-  title: "career-ops",
-  description: "AI-powered job search pipeline",
+  title: "CareerForge",
+  description: "AI-powered job search pipeline — discover, evaluate, and apply",
 };
 
 export default function RootLayout({

@@ -26,27 +26,48 @@ export default function CVPage() {
 
   async function save() {
     setSaving(true);
-    await fetch("/api/cv", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ content }),
-    });
-    setOriginal(content);
-    setSaving(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+    try {
+      const res = await fetch("/api/cv", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ content }),
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      setOriginal(content);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } catch (e: unknown) {
+      alert(e instanceof Error ? e.message : "Failed to save CV");
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function runAudit() {
     setAuditing(true);
     setAudit(null);
-    const res = await fetch("/api/cv", {
-      method: "PUT",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ content }),
-    });
-    const data = await res.json();
-    setAudit(data);
+    try {
+      const res = await fetch("/api/cv", {
+        method: "PUT",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ content }),
+      });
+      const data = await res.json();
+      if (data.error) {
+        alert(data.error);
+      } else {
+        setAudit({
+          atsScore: data.atsScore || 0,
+          issues: data.issues || [],
+          bulletsWithoutMetrics: data.bulletsWithoutMetrics || [],
+          suggestions: data.suggestions || []
+        });
+      }
+    } catch (e) {
+      console.error("Audit failed", e);
+      alert("Failed to run audit");
+    }
     setAuditing(false);
   }
 
@@ -68,6 +89,20 @@ export default function CVPage() {
         <div className="flex gap-3">
           <button className="btn-ghost" onClick={runAudit} disabled={auditing || !content}>
             {auditing ? "Auditing…" : "ATS Audit"}
+          </button>
+          <button
+            className="btn-primary"
+            onClick={() => window.open("/api/cv/pdf", "_blank")}
+            disabled={!content}
+          >
+            ↓ Download PDF
+          </button>
+          <button
+            className="btn-ghost"
+            onClick={() => window.open("/cv/print", "_blank")}
+            disabled={!content}
+          >
+            Print View
           </button>
           <button className="btn-primary" onClick={save} disabled={saving || !isDirty}>
             {saving ? "Saving…" : saved ? "Saved!" : isDirty ? "Save Changes" : "No Changes"}
