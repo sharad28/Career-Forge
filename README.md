@@ -6,6 +6,8 @@ Built with Next.js 16, Prisma (SQLite), and pluggable LLM providers (Claude, Ope
 
 ![Dashboard — Score distribution, AI suggestions, and recent applications](docs/demo/dashboard.png)
 
+> **🎥 Demo Video**: [Watch the CareerForge pipeline in action here](docs/demo/demo-video.gif) *(Replace `video_demo_placeholder.gif` with your actual demo file)*
+
 ---
 
 ## ✨ Features
@@ -179,6 +181,14 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 2. Fill out your background, target roles, and salary expectations.
 3. Plug in your preferred LLM API Key (or ensure Ollama is running locally if you chose the free alternative).
 4. *Important:* Make sure to set your default Apply Method (Manual is highly recommended).
+
+### 💡 Quickstart: Search for Jobs
+Once your profile is set up, here is how to find and evaluate your first role:
+1. Click **Scan** in the left sidebar.
+2. Type in your target role (e.g., `"Senior Backend Engineer"`) and location (e.g., `"Remote"`).
+3. The system will search across the 54+ default company portals (Greenhouse, Lever, etc.).
+4. Browse the results—you will see direct matches alongside AI-flagged tags like "H1B Friendly".
+5. Click **Evaluate & Add** on any job you like. The AI will instantly score the job description against your CV and highlight keyword gaps!
 
 ### Environment Variables
 
