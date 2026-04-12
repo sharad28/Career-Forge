@@ -11,7 +11,7 @@ Built with Next.js 16, Prisma (SQLite), and pluggable LLM providers (Claude, Ope
 ![CareerForge Pipeline Demo](docs/demo/demo-video.gif)
 
 ---
-![Dashboard — Score distribution, AI suggestions, and recent applications](docs/demo/dashboard.png)
+
 ## ✨ Features
 
 ### Phase 1: Find Jobs
