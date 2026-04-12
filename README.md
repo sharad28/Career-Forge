@@ -6,7 +6,9 @@ Built with Next.js 16, Prisma (SQLite), and pluggable LLM providers (Claude, Ope
 
 ![Dashboard — Score distribution, AI suggestions, and recent applications](docs/demo/dashboard.png)
 
-> **🎥 Demo Video**: [Watch the CareerForge pipeline in action here](docs/demo/demo-video.gif) *(Replace `video_demo_placeholder.gif` with your actual demo file)*
+**🎥 Demo Video**:
+
+![CareerForge Pipeline Demo](docs/demo/demo-video.gif)
 
 ---
 
