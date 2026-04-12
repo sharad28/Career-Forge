@@ -137,27 +137,48 @@ Enter a course or certification name and get an AI-powered ROI verdict: DO IT, D
 - npm or yarn
 - (Optional) [Ollama](https://ollama.ai) for free local AI
 
-### Setup
+### 🛠️ Step-by-Step Setup
 
+**1. Clone the repository**
 ```bash
-# Clone and install
-git clone <repo-url>
-cd careerforge
-npm install
+git clone https://github.com/sharad28/Career-Forge.git
+cd Career-Forge
+```
 
-# Initialize the database
+**2. Install dependencies**
+```bash
+npm install
+```
+
+**3. Configure Environment Variables**
+Copy the example environment file:
+```bash
+cp .env.example .env
+```
+Open `.env` in your editor. You must provide a 32-character random string for `ENCRYPTION_KEY` to securely encrypt your API keys locally. You can generate one quickly in your terminal by running:
+```bash
+openssl rand -base64 32
+```
+Leave `DATABASE_URL` as `file:./dev.db` unless you are using an external database.
+
+**4. Initialize the Database**
+Generate the Prisma typed client and push the schema to create your local SQLite database:
+```bash
 npx prisma generate
 npx prisma db push
+```
 
-# Set environment variables
-cp .env.example .env
-# Edit .env with your DATABASE_URL and ENCRYPTION_KEY
-
-# Start the dev server
+**5. Start the Application**
+```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) and complete the Settings setup.
+**6. Complete Onboarding**
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+1. Navigate to the **Settings** menu.
+2. Fill out your background, target roles, and salary expectations.
+3. Plug in your preferred LLM API Key (or ensure Ollama is running locally if you chose the free alternative).
+4. *Important:* Make sure to set your default Apply Method (Manual is highly recommended).
 
 ### Environment Variables
 
