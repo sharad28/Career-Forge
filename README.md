@@ -183,6 +183,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 2. Fill out your background, target roles, and salary expectations.
 3. Plug in your preferred LLM API Key (or ensure Ollama is running locally if you chose the free alternative).
 4. *Important:* Make sure to set your default Apply Method (Manual is highly recommended).
+5. Navigate to the **CV** option in the left sidebar and paste your existing CV in **Markdown format**. This acts as your master CV for ATS audits and auto-applications.
 
 ### 💡 Quickstart: Search for Jobs
 Once your profile is set up, here is how to find and evaluate your first role:
