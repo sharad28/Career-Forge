@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import ProfileGate from "@/components/ProfileGate";
 
 interface JobResult {
   title: string;
@@ -124,6 +125,7 @@ export default function ScanPage() {
   }
 
   return (
+    <ProfileGate requires={["llmApiKey", "targetRoles"]}>
     <div className="max-w-3xl mx-auto space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Job Scanner</h1>
@@ -318,5 +320,6 @@ export default function ScanPage() {
         </div>
       )}
     </div>
+    </ProfileGate>
   );
 }

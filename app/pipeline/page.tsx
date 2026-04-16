@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { scoreTier, TIER_STYLES } from "@/lib/scoring";
+import ProfileGate from "@/components/ProfileGate";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -483,7 +484,8 @@ export default function PipelinePage() {
   const isEvaluatingSelected = evaluating === selectedUrl;
 
   return (
-    // Break out of main's p-8 padding to fill full height
+    <ProfileGate requires={["llmApiKey", "cv", "targetRoles"]}>
+    {/* Break out of main's p-8 padding to fill full height */}
     <div className="-m-8 flex" style={{ height: "calc(100vh - 0px)" }}>
 
       {/* ── LEFT PANE ── */}
@@ -737,5 +739,6 @@ export default function PipelinePage() {
         )}
       </div>
     </div>
+    </ProfileGate>
   );
 }

@@ -66,9 +66,23 @@ Choose between two execution strategies for submitting your application:
 </details>
 
 <details>
+<summary><b>⊙ Profile Hub</b> — One place for everything about you</summary>
+
+All your personal details, CV, job target, AI settings, and automation preferences live under a single **Profile** page with tabbed navigation:
+- **About You** — name, email, phone, location, timezone, LinkedIn, portfolio
+- **CV** — markdown editor with ATS audit, PDF download, and print view
+- **Job Target** — target roles, salary range, H1B sponsorship filter
+- **AI** — LLM provider/model, API key, Brave Search key
+- **Automation** — auto-apply method, Computer Use toggle
+
+A **completeness bar** shows overall profile fill percentage, and each tab has a status dot (green = complete, yellow = partial, grey = empty). Feature pages that depend on profile data show a **guided banner** linking directly to the missing tab instead of a cryptic error.
+
+</details>
+
+<details>
 <summary><b>◻ CV Editor</b> — Markdown editor with AI-powered ATS Audit</summary>
 
-Edit your CV in markdown. Run ATS Audit to get a compatibility score (0–100), flagged issues, bullets missing metrics, and actionable suggestions. Download as PDF or print.
+Edit your CV in markdown (now inside Profile → CV tab). Run ATS Audit to get a compatibility score (0–100), flagged issues, bullets missing metrics, and actionable suggestions. Download as PDF or print.
 
 ![CV Editor — Markdown editor with full CV](docs/demo/cv_editor.png)
 ![ATS Audit — 88/100 score, 2 warnings, 3 bullets flagged](docs/demo/ats_audit.png)
@@ -177,21 +191,25 @@ npx prisma db push
 npm run dev
 ```
 
-**6. Complete Onboarding**
+**6. Complete Your Profile**
 Open [http://localhost:3000](http://localhost:3000) in your browser.
-1. Navigate to the **Settings** menu.
-2. Fill out your background, target roles, and salary expectations.
-3. Plug in your preferred LLM API Key (or ensure Ollama is running locally if you chose the free alternative).
-4. *Important:* Make sure to set your default Apply Method (Manual is highly recommended).
-5. Navigate to the **CV** option in the left sidebar and paste your existing CV in **Markdown format**. This acts as your master CV for ATS audits and auto-applications.
+1. Click **Profile** in the left sidebar — this is where all your setup lives.
+2. **About You** tab: fill in your name, email, phone, location, and links.
+3. **CV** tab: paste your existing CV in **Markdown format**. This is your master CV used for ATS audits, auto-applications, and AI-powered answers.
+4. **Job Target** tab: set your target roles, salary range, and H1B preference.
+5. **AI** tab: plug in your preferred LLM API Key (or ensure Ollama is running locally for the free alternative).
+6. **Automation** tab: set your default Apply Method (Manual is recommended).
+7. Watch the **completeness bar** at the top — aim for 100% before using features. If you skip anything, feature pages will show a banner linking you back to the exact tab you need.
 
 ### 💡 Quickstart: Search for Jobs
-Once your profile is set up, here is how to find and evaluate your first role:
-1. Click **Scan** in the left sidebar.
+Once your profile completeness bar hits 100%, here is how to find and evaluate your first role:
+1. Click **Scanner** in the left sidebar.
 2. Type in your target role (e.g., `"Senior Backend Engineer"`) and location (e.g., `"Remote"`).
 3. The system will search across the 54+ default company portals (Greenhouse, Lever, etc.).
-4. Browse the results—you will see direct matches alongside AI-flagged tags like "H1B Friendly".
+4. Browse the results — you will see direct matches alongside AI-flagged tags like "H1B Friendly".
 5. Click **Evaluate & Add** on any job you like. The AI will instantly score the job description against your CV and highlight keyword gaps!
+
+> **Tip:** If your profile is incomplete, feature pages show a yellow banner telling you exactly what's missing and linking to the right Profile tab. No more guessing why something failed.
 
 ### Environment Variables
 
@@ -210,21 +228,28 @@ Once your profile is set up, here is how to find and evaluate your first role:
 careerforge/
 ├── app/                    # Next.js App Router pages
 │   ├── page.tsx            # Dashboard
+│   ├── profile/            # Profile Hub (tabbed layout)
+│   │   ├── about/          #   → Name, contact, links
+│   │   ├── cv/             #   → CV Editor + ATS Audit
+│   │   ├── job-target/     #   → Target roles, salary, H1B
+│   │   ├── ai/             #   → LLM provider & web search
+│   │   ├── automation/     #   → Auto-apply preferences
+│   │   └── _lib/           #   → Shared useSettings hook
 │   ├── scan/               # Job Scanner
 │   ├── evaluate/           # AI Job Evaluator
 │   ├── tracker/            # Application Tracker
 │   ├── pipeline/           # Batch Queue
-│   ├── cv/                 # CV Editor + ATS Audit
 │   ├── linkedin/           # LinkedIn Optimizer
 │   ├── stories/            # STAR+R Story Bank
 │   ├── report/             # Evaluation Reports
 │   ├── research/           # Company Research
 │   ├── compare/            # Offer Comparison
 │   ├── training/           # Course Evaluator
-│   ├── settings/           # Profile & LLM Config
+│   ├── settings/           # → Redirects to /profile/about
+│   ├── cv/                 # → Redirects to /profile/cv
 │   ├── apply/              # Auto-Apply Workbench
 │   └── api/                # API Routes (one per feature)
-├── components/             # Shared UI components (Sidebar)
+├── components/             # Shared UI (Sidebar, ProfileGate)
 ├── lib/                    # Core business logic
 │   ├── ats/                # ATS adapters (Greenhouse, Lever, Ashby)
 │   ├── computer-use/       # Claude Computer Use agent

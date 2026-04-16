@@ -16,7 +16,6 @@ const groups = [
   {
     label: "Application",
     items: [
-      { href: "/cv", label: "CV Editor", icon: "◻", desc: "Edit & download CV" },
       { href: "/linkedin", label: "LinkedIn", icon: "◈", desc: "Profile & outreach" },
       { href: "/stories", label: "Stories", icon: "◇", desc: "Interview answers" },
       { href: "/ask", label: "Ask", icon: "⁇", desc: "Answer any question" },
@@ -32,9 +31,9 @@ const groups = [
     ],
   },
   {
-    label: "Config",
+    label: "You",
     items: [
-      { href: "/settings", label: "Settings", icon: "⊙", desc: "LLM keys & profile" },
+      { href: "/profile", label: "Profile", icon: "⊙", desc: "CV, AI, target & more" },
     ],
   },
 ];

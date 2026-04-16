@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import ProfileGate from "@/components/ProfileGate";
 
 interface LinkedInAudit {
   headline: { issue: string; rewrite: string };
@@ -45,6 +46,7 @@ export default function LinkedInPage() {
   }
 
   return (
+    <ProfileGate requires={["llmApiKey", "fullName"]}>
     <div className="max-w-3xl mx-auto space-y-6">
       <div>
         <h1 className="text-2xl font-bold">LinkedIn Optimizer</h1>
@@ -158,6 +160,7 @@ export default function LinkedInPage() {
         <PostGenerator />
       )}
     </div>
+    </ProfileGate>
   );
 }
 

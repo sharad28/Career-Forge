@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { marked } from "marked";
+import ProfileGate from "@/components/ProfileGate";
 
 interface Application {
   id: number;
@@ -100,6 +101,7 @@ export default function AskPage() {
   );
 
   return (
+    <ProfileGate requires={["llmApiKey", "cv"]}>
     <div className="max-w-3xl mx-auto space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Ask a Question</h1>
@@ -261,5 +263,6 @@ export default function AskPage() {
         </div>
       )}
     </div>
+    </ProfileGate>
   );
 }
